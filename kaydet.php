@@ -1,20 +1,31 @@
-<?php include "db.php";
+<?php
+include "db.php";
+if(!isset($_SESSION['login'])){ header("Location: login.php"); exit; }
 
-$ad=$_POST['ad']; $kat=$_POST['kategori']; $adet=$_POST['adet']; $lok=$_POST['lokasyon'];
+$ad          = trim($_POST['ad'] ?? '');
+$kat         = intval($_POST['kategori'] ?? 0);
+$adet        = intval($_POST['adet'] ?? 0);
+$lok         = trim($_POST['lokasyon'] ?? '');
 
-$resim="";
-if($_FILES['resim']['name']!=""){
-    $resim=time()."_".$_FILES['resim']['name'];
-    move_uploaded_file($_FILES['resim']['tmp_name'],"uploads/".$resim);
+$resim = "";
+if(isset($_FILES['resim']) && $_FILES['resim']['name'] != ""){
+    $uzanti = strtolower(pathinfo($_FILES['resim']['name'], PATHINFO_EXTENSION));
+    $resim  = time() . "_" . uniqid() . "." . $uzanti;
+    move_uploaded_file($_FILES['resim']['tmp_name'], "uploads/" . $resim);
 }
 
-$baglanti->query("INSERT INTO malzemeler (ad,kategori_id,adet,lokasyon,resim) VALUES ('$ad',$kat,$adet,'$lok','$resim')");
-$id=$baglanti->insert_id;
+$stmt = $baglanti->prepare("INSERT INTO malzemeler (ad, kategori_id, adet, lokasyon, resim) VALUES (?,?,?,?,?)");
+$stmt->bind_param("siiss", $ad, $kat, $adet, $lok, $resim);
+$stmt->execute();
+$id = $baglanti->insert_id;
 
-$alanlar=$baglanti->query("SELECT * FROM alanlar");
-while($a=$alanlar->fetch_assoc()){
-    $deger=$_POST['alan_'.$a['id']] ?? '';
-    $baglanti->query("INSERT INTO malzeme_alan (malzeme_id,alan_id,deger) VALUES ($id,".$a['id'].",'$deger')");
+$alanlar = $baglanti->query("SELECT * FROM alanlar");
+while($a = $alanlar->fetch_assoc()){
+    $deger = trim($_POST['alan_' . $a['id']] ?? '');
+    $stmt2 = $baglanti->prepare("INSERT INTO malzeme_alan (malzeme_id, alan_id, deger) VALUES (?,?,?)");
+    $stmt2->bind_param("iis", $id, $a['id'], $deger);
+    $stmt2->execute();
 }
 
-header("Location:index.php");
+header("Location: index.php");
+exit;

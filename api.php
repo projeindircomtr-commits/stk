@@ -17,136 +17,129 @@ $action = isset($_GET['action']) ? $_GET['action'] : '';
 $method = $_SERVER['REQUEST_METHOD'];
 
 // JSON request body al
-$input = json_decode(file_get_contents('php://input'), true);
+$input = json_decode(file_get_contents('php://input'), true) ?? [];
 
-// ======================== MALZEMELERİ AKTARabla ========================
+// ======================== MALZEMELER ========================
 if ($action == 'malzemeler' && $method == 'GET') {
-    $query = "SELECT * FROM malzemeler ORDER BY id DESC";
-    $result = mysqli_query($conn, $query);
+    $result = $baglanti->query("SELECT * FROM malzemeler ORDER BY id DESC");
     $malzemeler = [];
-    while ($row = mysqli_fetch_assoc($result)) {
+    while ($row = $result->fetch_assoc()) {
         $malzemeler[] = $row;
     }
     echo json_encode(['status' => 'success', 'data' => $malzemeler]);
 }
 
-// MALZEMELERİ EKLE
-else if ($action == 'malzeme_add' && $method == 'POST') {
-    $ad = isset($input['ad']) ? $input['ad'] : '';
-    $kategori_id = isset($input['kategori_id']) ? $input['kategori_id'] : 0;
-    $adet = isset($input['adet']) ? $input['adet'] : 0;
-    $lokasyon = isset($input['lokasyon']) ? $input['lokasyon'] : '';
+// MALZEME EKLE
+elseif ($action == 'malzeme_add' && $method == 'POST') {
+    $ad          = trim($input['ad'] ?? '');
+    $kategori_id = intval($input['kategori_id'] ?? 0);
+    $adet        = intval($input['adet'] ?? 0);
+    $lokasyon    = trim($input['lokasyon'] ?? '');
 
-    $query = "INSERT INTO malzemeler (ad, kategori_id, adet, lokasyon) 
-              VALUES ('$ad', $kategori_id, $adet, '$lokasyon')";
-    
-    if (mysqli_query($conn, $query)) {
-        $id = mysqli_insert_id($conn);
-        echo json_encode(['status' => 'success', 'id' => $id, 'message' => 'Malzeme eklendi']);
+    $stmt = $baglanti->prepare("INSERT INTO malzemeler (ad, kategori_id, adet, lokasyon) VALUES (?,?,?,?)");
+    $stmt->bind_param("siis", $ad, $kategori_id, $adet, $lokasyon);
+    if ($stmt->execute()) {
+        echo json_encode(['status' => 'success', 'id' => $baglanti->insert_id, 'message' => 'Malzeme eklendi']);
     } else {
-        echo json_encode(['status' => 'error', 'message' => 'Hata: ' . mysqli_error($conn)]);
+        echo json_encode(['status' => 'error', 'message' => $baglanti->error]);
     }
 }
 
-// MALZEMELERİ GÜNCELLE
-else if ($action == 'malzeme_update' && $method == 'POST') {
-    $id = isset($input['id']) ? $input['id'] : 0;
-    $ad = isset($input['ad']) ? $input['ad'] : '';
-    $adet = isset($input['adet']) ? $input['adet'] : 0;
+// MALZEME GÜNCELLE
+elseif ($action == 'malzeme_update' && $method == 'POST') {
+    $id   = intval($input['id'] ?? 0);
+    $ad   = trim($input['ad'] ?? '');
+    $adet = intval($input['adet'] ?? 0);
 
-    $query = "UPDATE malzemeler SET ad='$ad', adet=$adet WHERE id=$id";
-    
-    if (mysqli_query($conn, $query)) {
+    $stmt = $baglanti->prepare("UPDATE malzemeler SET ad=?, adet=? WHERE id=?");
+    $stmt->bind_param("sii", $ad, $adet, $id);
+    if ($stmt->execute()) {
         echo json_encode(['status' => 'success', 'message' => 'Malzeme güncellendi']);
     } else {
-        echo json_encode(['status' => 'error', 'message' => 'Hata: ' . mysqli_error($conn)]);
+        echo json_encode(['status' => 'error', 'message' => $baglanti->error]);
     }
 }
 
-// MALZEMELERİ SİL
-else if ($action == 'malzeme_delete' && $method == 'POST') {
-    $id = isset($input['id']) ? $input['id'] : 0;
-    
-    $query = "DELETE FROM malzemeler WHERE id=$id";
-    
-    if (mysqli_query($conn, $query)) {
+// MALZEME SİL
+elseif ($action == 'malzeme_delete' && $method == 'POST') {
+    $id = intval($input['id'] ?? 0);
+
+    $stmt = $baglanti->prepare("DELETE FROM malzemeler WHERE id=?");
+    $stmt->bind_param("i", $id);
+    if ($stmt->execute()) {
         echo json_encode(['status' => 'success', 'message' => 'Malzeme silindi']);
     } else {
-        echo json_encode(['status' => 'error', 'message' => 'Hata: ' . mysqli_error($conn)]);
+        echo json_encode(['status' => 'error', 'message' => $baglanti->error]);
     }
 }
 
 // ======================== ARAÇLAR ========================
-else if ($action == 'araclar' && $method == 'GET') {
-    $query = "SELECT * FROM araclar ORDER BY id DESC";
-    $result = mysqli_query($conn, $query);
+elseif ($action == 'araclar' && $method == 'GET') {
+    $result = $baglanti->query("SELECT * FROM araclar ORDER BY id DESC");
     $araclar = [];
-    while ($row = mysqli_fetch_assoc($result)) {
+    while ($row = $result->fetch_assoc()) {
         $araclar[] = $row;
     }
     echo json_encode(['status' => 'success', 'data' => $araclar]);
 }
 
-else if ($action == 'arac_add' && $method == 'POST') {
-    $marka = $input['marka'] ?? '';
-    $model = $input['model'] ?? '';
-    $plaka = $input['plaka'] ?? '';
-    $sahip = $input['sahip'] ?? '';
-    $telefon = $input['telefon'] ?? '';
+elseif ($action == 'arac_add' && $method == 'POST') {
+    $marka   = trim($input['marka'] ?? '');
+    $model   = trim($input['model'] ?? '');
+    $plaka   = trim($input['plaka'] ?? '');
+    $sahip   = trim($input['sahip'] ?? '');
+    $telefon = trim($input['telefon'] ?? '');
 
-    $query = "INSERT INTO araclar (marka, model, plaka, sahip, telefon) 
-              VALUES ('$marka', '$model', '$plaka', '$sahip', '$telefon')";
-    
-    if (mysqli_query($conn, $query)) {
+    $stmt = $baglanti->prepare("INSERT INTO araclar (marka, model, plaka, sahip, telefon) VALUES (?,?,?,?,?)");
+    $stmt->bind_param("sssss", $marka, $model, $plaka, $sahip, $telefon);
+    if ($stmt->execute()) {
         echo json_encode(['status' => 'success', 'message' => 'Araç eklendi']);
     } else {
-        echo json_encode(['status' => 'error', 'message' => mysqli_error($conn)]);
+        echo json_encode(['status' => 'error', 'message' => $baglanti->error]);
     }
 }
 
 // ======================== KATEGORİLER ========================
-else if ($action == 'kategoriler' && $method == 'GET') {
-    $query = "SELECT * FROM kategoriler ORDER BY id DESC";
-    $result = mysqli_query($conn, $query);
+elseif ($action == 'kategoriler' && $method == 'GET') {
+    $result = $baglanti->query("SELECT * FROM kategoriler ORDER BY id DESC");
     $kategoriler = [];
-    while ($row = mysqli_fetch_assoc($result)) {
+    while ($row = $result->fetch_assoc()) {
         $kategoriler[] = $row;
     }
     echo json_encode(['status' => 'success', 'data' => $kategoriler]);
 }
 
-else if ($action == 'kategori_add' && $method == 'POST') {
-    $ad = $input['ad'] ?? '';
-    
-    $query = "INSERT INTO kategoriler (ad) VALUES ('$ad')";
-    
-    if (mysqli_query($conn, $query)) {
+elseif ($action == 'kategori_add' && $method == 'POST') {
+    $ad = trim($input['ad'] ?? '');
+
+    $stmt = $baglanti->prepare("INSERT INTO kategoriler (ad) VALUES (?)");
+    $stmt->bind_param("s", $ad);
+    if ($stmt->execute()) {
         echo json_encode(['status' => 'success', 'message' => 'Kategori eklendi']);
     } else {
-        echo json_encode(['status' => 'error', 'message' => mysqli_error($conn)]);
+        echo json_encode(['status' => 'error', 'message' => $baglanti->error]);
     }
 }
 
 // ======================== LOKASYONLAR ========================
-else if ($action == 'lokasyonlar' && $method == 'GET') {
-    $query = "SELECT * FROM lokasyonlar ORDER BY id DESC";
-    $result = mysqli_query($conn, $query);
+elseif ($action == 'lokasyonlar' && $method == 'GET') {
+    $result = $baglanti->query("SELECT * FROM lokasyonlar ORDER BY id DESC");
     $lokasyonlar = [];
-    while ($row = mysqli_fetch_assoc($result)) {
+    while ($row = $result->fetch_assoc()) {
         $lokasyonlar[] = $row;
     }
     echo json_encode(['status' => 'success', 'data' => $lokasyonlar]);
 }
 
-else if ($action == 'lokasyon_add' && $method == 'POST') {
-    $ad = $input['ad'] ?? '';
-    
-    $query = "INSERT INTO lokasyonlar (ad) VALUES ('$ad')";
-    
-    if (mysqli_query($conn, $query)) {
+elseif ($action == 'lokasyon_add' && $method == 'POST') {
+    $ad = trim($input['ad'] ?? '');
+
+    $stmt = $baglanti->prepare("INSERT INTO lokasyonlar (ad) VALUES (?)");
+    $stmt->bind_param("s", $ad);
+    if ($stmt->execute()) {
         echo json_encode(['status' => 'success', 'message' => 'Lokasyon eklendi']);
     } else {
-        echo json_encode(['status' => 'error', 'message' => mysqli_error($conn)]);
+        echo json_encode(['status' => 'error', 'message' => $baglanti->error]);
     }
 }
 
@@ -155,5 +148,5 @@ else {
     echo json_encode(['status' => 'error', 'message' => 'Geçersiz istek']);
 }
 
-mysqli_close($conn);
+$baglanti->close();
 ?>

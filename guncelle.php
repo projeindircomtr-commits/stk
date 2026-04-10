@@ -25,10 +25,10 @@ $lokasyonlar = $baglanti->query("SELECT * FROM lokasyonlar");
 $mesaj = '';
 
 if(isset($_POST['guncelle'])){
-    $ad = $baglanti->real_escape_string($_POST['ad']);
-    $adet = intval($_POST['adet']);
-    $kategori_id = intval($_POST['kategori_id']);
-    $lokasyon = $baglanti->real_escape_string($_POST['lokasyon']);
+    $ad          = trim($_POST['ad'] ?? '');
+    $adet        = intval($_POST['adet'] ?? 0);
+    $kategori_id = intval($_POST['kategori_id'] ?? 0);
+    $lokasyon    = trim($_POST['lokasyon'] ?? '');
 
     $resimAdi = $malzeme['resim'];
 
@@ -38,27 +38,22 @@ if(isset($_POST['guncelle'])){
         if(!is_dir($hedefKlasor)){
             mkdir($hedefKlasor, 0777, true);
         }
-        $resimAdi = time().'_'.preg_replace('/[^a-zA-Z0-9_.]/','_',$_FILES['resim']['name']);
-        $hedef = $hedefKlasor.$resimAdi;
+        $resimAdi = time() . '_' . uniqid() . '.' . strtolower(pathinfo($_FILES['resim']['name'], PATHINFO_EXTENSION));
+        $hedef    = $hedefKlasor . $resimAdi;
 
         if(!move_uploaded_file($_FILES['resim']['tmp_name'], $hedef)){
             $mesaj = "❌ Resim yüklenemedi! uploads klasör izinlerini kontrol et veya dosya boyutu çok büyük.";
         }
     }
 
-    $sql = "UPDATE malzemeler SET 
-                ad='$ad',
-                adet='$adet',
-                kategori_id='$kategori_id',
-                lokasyon='$lokasyon',
-                resim='$resimAdi'
-            WHERE id=$id";
+    $stmt = $baglanti->prepare("UPDATE malzemeler SET ad=?, adet=?, kategori_id=?, lokasyon=?, resim=? WHERE id=?");
+    $stmt->bind_param("siissi", $ad, $adet, $kategori_id, $lokasyon, $resimAdi, $id);
 
-    if($baglanti->query($sql)){
+    if($stmt->execute()){
         $mesaj = "✅ Malzeme başarıyla güncellendi!";
-        $malzeme = $baglanti->query("SELECT * FROM malzemeler WHERE id=$id")->fetch_assoc();
+        $malzeme = $baglanti->query("SELECT * FROM malzemeler WHERE id=" . intval($id))->fetch_assoc();
     } else {
-        $mesaj = "❌ Hata: ".$baglanti->error;
+        $mesaj = "❌ Hata: " . $baglanti->error;
     }
 }
 ?>
