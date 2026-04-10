@@ -6,6 +6,13 @@ header('Access-Control-Allow-Headers: Content-Type');
 
 require 'db.php';
 
+// Kimlik doğrulama kontrolü
+if(!isset($_SESSION['login']) || $_SESSION['login'] !== true){
+    http_response_code(401);
+    echo json_encode(['error' => 'Yetkisiz erişim']);
+    exit;
+}
+
 $action = isset($_GET['action']) ? $_GET['action'] : '';
 $method = $_SERVER['REQUEST_METHOD'];
 

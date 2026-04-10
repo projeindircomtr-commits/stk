@@ -4,20 +4,28 @@ if(!isset($_SESSION['login'])){ header("Location: login.php"); exit; }
 $id=intval($_GET['id'] ?? 0);
 
 if($_POST){
-    $miktar=$_POST['miktar']; 
-    $tip=$_POST['tip']; 
-    $kisi=$_POST['kisi'] ?? '';
+    $miktar = intval($_POST['miktar'] ?? 0);
+    $tip    = in_array($_POST['tip'] ?? '', ['giris', 'cikis']) ? $_POST['tip'] : 'giris';
+    $kisi   = trim($_POST['kisi'] ?? '');
 
-    if($tip=="giris"){ 
-        $baglanti->query("UPDATE malzemeler SET adet=adet+$miktar WHERE id=$id"); 
-    }
-    else{ 
-        $baglanti->query("UPDATE malzemeler SET adet=adet-$miktar WHERE id=$id"); 
-        $baglanti->query("INSERT INTO zimmet (malzeme_id,alan_kisi,miktar) VALUES ($id,'$kisi',$miktar)");
+    if($tip == "giris"){
+        $stmt = $baglanti->prepare("UPDATE malzemeler SET adet=adet+? WHERE id=?");
+        $stmt->bind_param("ii", $miktar, $id);
+        $stmt->execute();
+    } else {
+        $stmt = $baglanti->prepare("UPDATE malzemeler SET adet=adet-? WHERE id=?");
+        $stmt->bind_param("ii", $miktar, $id);
+        $stmt->execute();
+        $stmt2 = $baglanti->prepare("INSERT INTO zimmet (malzeme_id, alan_kisi, miktar) VALUES (?, ?, ?)");
+        $stmt2->bind_param("isi", $id, $kisi, $miktar);
+        $stmt2->execute();
     }
 
-    $baglanti->query("INSERT INTO stok_hareket (malzeme_id,islem,miktar) VALUES ($id,'$tip',$miktar)");
-    header("Location:index.php");
+    $stmt3 = $baglanti->prepare("INSERT INTO stok_hareket (malzeme_id, islem, miktar) VALUES (?, ?, ?)");
+    $stmt3->bind_param("isi", $id, $tip, $miktar);
+    $stmt3->execute();
+    header("Location: index.php");
+    exit;
 }
 ?>
 

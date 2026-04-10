@@ -10,15 +10,15 @@ $mesaj = '';
 $mesaj_tip = '';
 
 if(isset($_POST['kaydet'])){
-    $marka       = $baglanti->real_escape_string($_POST['marka']);
-    $model       = $baglanti->real_escape_string($_POST['model']);
-    $plaka       = $baglanti->real_escape_string($_POST['plaka']);
-    $sahip       = $baglanti->real_escape_string($_POST['sahip']);
-    $telefon     = $baglanti->real_escape_string($_POST['telefon']);
-    $camera      = $baglanti->real_escape_string($_POST['camera'] ?? 'Yok');
-    $gps         = $baglanti->real_escape_string($_POST['gps'] ?? 'Yok');
+    $marka       = trim($_POST['marka'] ?? '');
+    $model       = trim($_POST['model'] ?? '');
+    $plaka       = trim($_POST['plaka'] ?? '');
+    $sahip       = trim($_POST['sahip'] ?? '');
+    $telefon     = trim($_POST['telefon'] ?? '');
+    $camera      = in_array($_POST['camera'] ?? '', ['Var', 'Yok']) ? $_POST['camera'] : 'Yok';
+    $gps         = in_array($_POST['gps'] ?? '', ['Var', 'Yok']) ? $_POST['gps'] : 'Yok';
     $kategori_id = intval($_POST['kategori_id'] ?? 0);
-    $lokasyon    = $baglanti->real_escape_string(trim($_POST['lokasyon'] ?? ''));
+    $lokasyon    = trim($_POST['lokasyon'] ?? '');
 
     $resim = '';
 
@@ -44,9 +44,9 @@ if(isset($_POST['kaydet'])){
     }
 
     if($mesaj == ''){
-        $sql = "INSERT INTO araclar (marka, model, plaka, sahip, telefon, camera, gps, kategori_id, lokasyon, resim)
-                VALUES ('$marka','$model','$plaka','$sahip','$telefon','$camera','$gps','$kategori_id','$lokasyon','$resim')";
-        if($baglanti->query($sql)){
+        $stmt = $baglanti->prepare("INSERT INTO araclar (marka, model, plaka, sahip, telefon, camera, gps, kategori_id, lokasyon, resim) VALUES (?,?,?,?,?,?,?,?,?,?)");
+        $stmt->bind_param("sssssssiss", $marka, $model, $plaka, $sahip, $telefon, $camera, $gps, $kategori_id, $lokasyon, $resim);
+        if($stmt->execute()){
             $mesaj     = "Araç başarıyla kaydedildi!";
             $mesaj_tip = "success";
         } else {

@@ -19,27 +19,21 @@ if(!$arac){
 $mesaj = '';
 
 if(isset($_POST['guncelle'])){
-    $marka = $baglanti->real_escape_string($_POST['marka']);
-    $model = $baglanti->real_escape_string($_POST['model']);
-    $plaka = $baglanti->real_escape_string($_POST['plaka']);
-    $sahip = $baglanti->real_escape_string($_POST['sahip']);
-    $telefon = $baglanti->real_escape_string($_POST['telefon']);
-    $lokasyon = $baglanti->real_escape_string(trim($_POST['lokasyon'] ?? ''));
+    $marka    = trim($_POST['marka'] ?? '');
+    $model    = trim($_POST['model'] ?? '');
+    $plaka    = trim($_POST['plaka'] ?? '');
+    $sahip    = trim($_POST['sahip'] ?? '');
+    $telefon  = trim($_POST['telefon'] ?? '');
+    $lokasyon = trim($_POST['lokasyon'] ?? '');
 
-    $sql = "UPDATE araclar SET 
-                marka='$marka',
-                model='$model',
-                plaka='$plaka',
-                sahip='$sahip',
-                telefon='$telefon',
-                lokasyon='$lokasyon'
-            WHERE id=$id";
+    $stmt = $baglanti->prepare("UPDATE araclar SET marka=?, model=?, plaka=?, sahip=?, telefon=?, lokasyon=? WHERE id=?");
+    $stmt->bind_param("ssssssi", $marka, $model, $plaka, $sahip, $telefon, $lokasyon, $id);
 
-    if($baglanti->query($sql)){
+    if($stmt->execute()){
         $mesaj = "✅ Araç başarıyla güncellendi!";
-        $arac = $baglanti->query("SELECT * FROM araclar WHERE id=$id")->fetch_assoc();
+        $arac = $baglanti->query("SELECT * FROM araclar WHERE id=" . intval($id))->fetch_assoc();
     } else {
-        $mesaj = "❌ Hata: ".$baglanti->error;
+        $mesaj = "❌ Hata: " . $baglanti->error;
     }
 }
 ?>

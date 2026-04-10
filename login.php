@@ -7,19 +7,30 @@ if(isset($_SESSION['login']) && $_SESSION['login']===true){
 }
 $hata = '';
 if($_POST){
-    $kullanici = $_POST['kullanici'];
-    $sifre = $_POST['sifre'];
-    $query = $baglanti->query("SELECT * FROM kullanicilar WHERE kullanici_adi='$kullanici' AND sifre='$sifre'");
-    if($query->num_rows>0){
-        $u = $query->fetch_assoc();
-        $_SESSION['login'] = true;
-        $_SESSION['kullanici'] = $kullanici;
-        $_SESSION['rol'] = $u['rol'];
-        header("Location:index.php");
-        exit;
-    } else {
-        $hata = "Kullanıcı adı veya şifre yanlış!";
+    $kullanici = trim($_POST['kullanici'] ?? '');
+    $sifre     = $_POST['sifre'] ?? '';
+    $stmt = $baglanti->prepare("SELECT * FROM kullanicilar WHERE kullanici_adi=?");
+    $stmt->bind_param("s", $kullanici);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if($result->num_rows > 0){
+        $u = $result->fetch_assoc();
+        // Şifre doğrulama: hash veya düz metin
+        $gecerli = false;
+        if(strlen($u['sifre']) >= 60 && substr($u['sifre'], 0, 1) === '$'){
+            $gecerli = password_verify($sifre, $u['sifre']);
+        } else {
+            $gecerli = ($sifre === $u['sifre']);
+        }
+        if($gecerli){
+            $_SESSION['login'] = true;
+            $_SESSION['kullanici'] = $kullanici;
+            $_SESSION['rol'] = $u['rol'];
+            header("Location: index.php");
+            exit;
+        }
     }
+    $hata = "Kullanıcı adı veya şifre yanlış!";
 }
 ?>
 
