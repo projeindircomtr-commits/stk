@@ -11,11 +11,13 @@ $basarili = '';
 
 // Yeni kategori ekle
 if($_POST && isset($_POST['kategori'])){
-    $ad = $baglanti->real_escape_string($_POST['kategori']);
-    if($baglanti->query("INSERT INTO kategoriler (ad) VALUES ('$ad')")){
+    $ad = trim($_POST['kategori'] ?? '');
+    $stmt = $baglanti->prepare("INSERT INTO kategoriler (ad) VALUES (?)");
+    $stmt->bind_param("s", $ad);
+    if($stmt->execute()){
         $basarili = "✅ Kategori başarıyla eklendi!";
     } else {
-        $hata = "❌ Kategori eklenemedi! Hata: ".$baglanti->error;
+        $hata = "❌ Kategori eklenemedi! Hata: " . $baglanti->error;
     }
 }
 

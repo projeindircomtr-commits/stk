@@ -6,21 +6,44 @@ if(!isset($_SESSION['login'])){
 }
 
 // Arama ve filtre
-$ara = isset($_GET['ara']) ? $baglanti->real_escape_string($_GET['ara']) : '';
-$kategori_id = isset($_GET['kategori_id']) ? intval($_GET['kategori_id']) : 0;
-$lokasyon = isset($_GET['lokasyon']) ? $baglanti->real_escape_string($_GET['lokasyon']) : '';
+$ara         = trim($_GET['ara'] ?? '');
+$kategori_id = intval($_GET['kategori_id'] ?? 0);
+$lokasyon    = trim($_GET['lokasyon'] ?? '');
 
 // Kategoriler ve lokasyonlar
 $kategoriler = $baglanti->query("SELECT * FROM kategoriler");
 $lokasyonlar = $baglanti->query("SELECT * FROM lokasyonlar");
 
-// Malzemeler sorgu
-$sql = "SELECT m.*, k.ad as kategori FROM malzemeler m LEFT JOIN kategoriler k ON m.kategori_id=k.id WHERE 1";
-if($ara != '') $sql .= " AND m.ad LIKE '%$ara%'";
-if($kategori_id > 0) $sql .= " AND m.kategori_id = $kategori_id";
-if($lokasyon != '') $sql .= " AND m.lokasyon = '$lokasyon'";
+// Malzemeler sorgu - dinamik filtre ile prepared statement
+$sql    = "SELECT m.*, k.ad as kategori FROM malzemeler m LEFT JOIN kategoriler k ON m.kategori_id=k.id WHERE 1";
+$params = [];
+$types  = '';
+
+if($ara != ''){
+    $sql    .= " AND m.ad LIKE ?";
+    $araParam = '%' . $ara . '%';
+    $params[] = &$araParam;
+    $types   .= 's';
+}
+if($kategori_id > 0){
+    $sql    .= " AND m.kategori_id = ?";
+    $params[] = &$kategori_id;
+    $types   .= 'i';
+}
+if($lokasyon != ''){
+    $sql    .= " AND m.lokasyon = ?";
+    $params[] = &$lokasyon;
+    $types   .= 's';
+}
 $sql .= " ORDER BY m.id DESC";
-$malzemeler = $baglanti->query($sql);
+
+$stmt = $baglanti->prepare($sql);
+if(!empty($params)){
+    array_unshift($params, $types);
+    call_user_func_array([$stmt, 'bind_param'], $params);
+}
+$stmt->execute();
+$malzemeler = $stmt->get_result();
 ?>
 
 <!DOCTYPE html>

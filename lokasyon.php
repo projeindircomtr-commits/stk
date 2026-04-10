@@ -7,11 +7,13 @@ $basarili = '';
 
 // Yeni lokasyon ekle
 if($_POST && isset($_POST['lokasyon'])){
-    $ad = $baglanti->real_escape_string($_POST['lokasyon']);
-    if($baglanti->query("INSERT INTO lokasyonlar (ad) VALUES ('$ad')")){
+    $ad = trim($_POST['lokasyon'] ?? '');
+    $stmt = $baglanti->prepare("INSERT INTO lokasyonlar (ad) VALUES (?)");
+    $stmt->bind_param("s", $ad);
+    if($stmt->execute()){
         $basarili = "Lokasyon başarıyla eklendi!";
     } else {
-        $hata = "Lokasyon eklenemedi! Hata: ".$baglanti->error;
+        $hata = "Lokasyon eklenemedi! Hata: " . $baglanti->error;
     }
 }
 

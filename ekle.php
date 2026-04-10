@@ -15,10 +15,10 @@ $mesaj = '';
 $mesaj_tip = '';
 
 if(isset($_POST['kaydet'])){
-    $ad = $baglanti->real_escape_string(trim($_POST['ad']));
-    $adet = intval($_POST['adet']);
-    $kategori_id = intval($_POST['kategori_id']);
-    $lokasyon = $baglanti->real_escape_string(trim($_POST['lokasyon']));
+    $ad          = trim($_POST['ad'] ?? '');
+    $adet        = intval($_POST['adet'] ?? 0);
+    $kategori_id = intval($_POST['kategori_id'] ?? 0);
+    $lokasyon    = trim($_POST['lokasyon'] ?? '');
 
     $resimAdi = null;
 
@@ -66,16 +66,14 @@ if(isset($_POST['kaydet'])){
 
     // Veritabanına kaydet (hata yoksa)
     if($mesaj_tip != 'danger'){
-        $resim_kayit = $resimAdi ? "'".$baglanti->real_escape_string($resimAdi)."'" : "NULL";
-        $sql = "INSERT INTO malzemeler (ad, adet, kategori_id, lokasyon, resim)
-                VALUES ('$ad', '$adet', '$kategori_id', '$lokasyon', $resim_kayit)";
-        
-        if($baglanti->query($sql)){
-            $mesaj = "✅ Malzeme başarıyla eklendi!";
+        $stmt = $baglanti->prepare("INSERT INTO malzemeler (ad, adet, kategori_id, lokasyon, resim) VALUES (?,?,?,?,?)");
+        $stmt->bind_param("siiss", $ad, $adet, $kategori_id, $lokasyon, $resimAdi);
+        if($stmt->execute()){
+            $mesaj     = "✅ Malzeme başarıyla eklendi!";
             $mesaj_tip = "success";
-            $_POST = array();
+            $_POST     = [];
         } else {
-            $mesaj = "❌ Malzeme eklenmedi! Veritabanı hatası.";
+            $mesaj     = "❌ Malzeme eklenmedi! Veritabanı hatası.";
             $mesaj_tip = "danger";
         }
     }
