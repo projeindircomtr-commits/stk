@@ -1,0 +1,85 @@
+# PWA ve Offline Desteği için .htaccess Ayarları
+
+# HTTPS zorla
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Manifest.json MIME türü
+<FilesMatch "\.json$">
+    Header set Content-Type "application/json; charset=utf-8"
+    Header set Cache-Control "max-age=31536000, public"
+</FilesMatch>
+
+# Service Worker MIME türü
+<FilesMatch "\.js$">
+    Header set Content-Type "application/javascript; charset=utf-8"
+    Header set Cache-Control "max-age=3600, public"
+</FilesMatch>
+
+# HTML dosyaları için cache kontrol
+<FilesMatch "\.php$">
+    Header set Cache-Control "max-age=3600, must-revalidate"
+</FilesMatch>
+
+# offline.html dosyasını cache yap
+<FilesMatch "offline\.html$">
+    Header set Cache-Control "max-age=604800, public"
+</FilesMatch>
+
+# app.js ve service-worker dosyaları
+<FilesMatch "(app\.js|service-worker-v2\.js)$">
+    Header set Cache-Control "max-age=86400, public"
+    Header set Service-Worker-Allowed "/"
+</FilesMatch>
+
+# Resim dosyaları için cache
+<FilesMatch "\.(jpg|jpeg|png|gif|svg|webp)$">
+    Header set Cache-Control "max-age=2592000, public"
+</FilesMatch>
+
+# CSS ve JS dosyaları
+<FilesMatch "\.(css|js)$">
+    Header set Cache-Control "max-age=31536000, public"
+</FilesMatch>
+
+# Font dosyaları
+<FilesMatch "\.(woff|woff2|ttf|otf|eot)$">
+    Header set Cache-Control "max-age=31536000, public"
+    Header set Access-Control-Allow-Origin "*"
+</FilesMatch>
+
+# Gzip sıkıştırması
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+</IfModule>
+
+# 404 hatalarında offline.html göster
+ErrorDocument 404 /stok/offline.html
+
+# index.php'ye yönlendir
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# Güvenlik ayarları
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Dizin listesini kapat
+Options -Indexes
+
+# PHP hata gösterme ayarları
+php_flag display_errors Off
+php_flag log_errors On
+php_value error_log /home/logs/php_errors.log
+
+php_value upload_max_filesize 20M
+php_value post_max_size 25M
+php_value memory_limit 128M
+php_value max_file_uploads 20
