@@ -43,8 +43,8 @@ if(isset($_POST['kaydet'])){
             if(!in_array($dosya_uzantisi, $izin_verilen)){
                 $mesaj = "❌ Malzeme eklenmedi! Sadece JPG, PNG, GIF ve WEBP dosyaları yüklenebilir.";
                 $mesaj_tip = "danger";
-            } else if($_FILES['resim']['size'] > 5242880){
-                $mesaj = "❌ Malzeme eklenmedi! Dosya boyutu 5MB'dan büyük olamaz.";
+            } else if($_FILES['resim']['size'] > 104857600){
+                $mesaj = "❌ Malzeme eklenmedi! Dosya boyutu 100MB'dan büyük olamaz.";
                 $mesaj_tip = "danger";
             } else {
                 $resimAdi = 'malzeme_' . time() . '_' . rand(1000, 9999) . '.' . $dosya_uzantisi;
@@ -406,7 +406,7 @@ if(isset($_POST['kaydet'])){
                     >
                     <small class="small-text">
                         ✅ Mobil cihazlarda direkt kamera açılacak<br>
-                        📸 Desteklenen: JPG, PNG, GIF, WEBP (Max 5MB)<br>
+                        📸 Desteklenen: JPG, PNG, GIF, WEBP (Max 100MB)<br>
                         📌 Resim zorunlu değil
                     </small>
                     <img id="preview" class="preview-img" alt="Resim Önizlemesi">

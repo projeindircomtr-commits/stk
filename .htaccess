@@ -79,7 +79,7 @@ php_flag display_errors Off
 php_flag log_errors On
 php_value error_log /home/logs/php_errors.log
 
-php_value upload_max_filesize 20M
-php_value post_max_size 25M
-php_value memory_limit 128M
+php_value upload_max_filesize 100M
+php_value post_max_size 110M
+php_value memory_limit 256M
 php_value max_file_uploads 20

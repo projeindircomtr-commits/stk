@@ -557,6 +557,7 @@ body {
                     <th><i class="bi bi-person"></i> Sahip</th>
                     <th><i class="bi bi-telephone"></i> Telefon</th>
                     <th><i class="bi bi-tag"></i> Kategori</th>
+                    <th><i class="bi bi-geo-alt-fill"></i> Lokasyon</th>
                     <th><i class="bi bi-wrench"></i> İşlemler</th>
                 </tr>
             </thead>
@@ -604,6 +605,7 @@ body {
                         </a>
                     </td>
                     <td><span class="kategori-badge"><?= htmlspecialchars($a['kategori'] ?? 'Kategorisiz') ?></span></td>
+                    <td><?= htmlspecialchars($a['lokasyon'] ?? '-') ?></td>
                     <td style="white-space:nowrap;">
                         <a href="arac_guncelle.php?id=<?= $a['id'] ?>" class="btn-guncelle">
                             <i class="bi bi-pencil"></i> Güncelle

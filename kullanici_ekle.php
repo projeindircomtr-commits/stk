@@ -6,9 +6,7 @@ if(!isset($_SESSION['login'])){
 }
 
 // Şu an giriş yapan kullanıcının rolünü al
-$giren_id = $_SESSION['login'];
-$giren = $baglanti->query("SELECT * FROM kullanicilar WHERE id=$giren_id")->fetch_assoc();
-$admin_mi = $giren['rol']==1 ? true : false;
+$admin_mi = isset($_SESSION['rol']) && $_SESSION['rol'] == 1;
 
 // Yeni kullanıcı ekleme sadece admin görebilsin
 $msg = '';

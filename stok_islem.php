@@ -1,6 +1,7 @@
 <?php 
 include "db.php"; 
-$id=$_GET['id'];
+if(!isset($_SESSION['login'])){ header("Location: login.php"); exit; }
+$id=intval($_GET['id'] ?? 0);
 
 if($_POST){
     $miktar=$_POST['miktar']; 

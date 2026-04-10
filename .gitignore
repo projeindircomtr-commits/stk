@@ -1,0 +1,24 @@
+# Yüklenen resimler (uploads klasöründeki .gitkeep hariç)
+uploads/*
+!uploads/.gitkeep
+
+# PHP hata logları
+error_log
+*.log
+
+# Geçici çıkarılmış dosyalar
+extracted/
+
+# Ortam değişkenleri
+.env
+
+# IDE dosyaları
+.vscode/
+.idea/
+*.swp
+*.swo
+# Zip arşivleri
+stk.zip
+extracted/
+Stok-main/
+Stok-main.zip

@@ -48,6 +48,7 @@ CREATE TABLE `araclar` (
   `sahip` varchar(50) DEFAULT NULL,
   `telefon` varchar(20) DEFAULT NULL,
   `kategori_id` int(11) DEFAULT NULL,
+  `lokasyon` varchar(100) DEFAULT NULL,
   `resim` varchar(255) DEFAULT NULL,
   `kamera` varchar(10) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
@@ -56,12 +57,12 @@ CREATE TABLE `araclar` (
 -- Tablo döküm verisi `araclar`
 --
 
-INSERT INTO `araclar` (`id`, `marka`, `model`, `plaka`, `camera`, `gps`, `sahip`, `telefon`, `kategori_id`, `resim`, `kamera`) VALUES
-(1, 'Ghj', 'Ghj', 'Ghjk', 'Var', 'Yok', 'Hjkk', 'Ghjk', 1, '', NULL),
-(2, 'Hjkkj', 'Hhddd', 'Bhhh', 'Var', 'Var', 'Fguom', '99968', 1, '', NULL),
-(3, 'Ggh', 'Vvhh', 'Ghjh', 'Var', 'Yok', 'Vbh', '999', 1, '', NULL),
-(4, 'Hjkkjvhbbvjk', 'Yhjkjj', 'Ghbnn', 'Var', 'Yok', 'Bnlllkj', '86789', 1, '', NULL),
-(7, 'Hh', 'Hhh', 'Bb', 'Yok', 'Yok', 'Bbb', 'Bbb', 1, '1775463967_17754639376613051843326023897659.jpg', NULL);
+INSERT INTO `araclar` (`id`, `marka`, `model`, `plaka`, `camera`, `gps`, `sahip`, `telefon`, `kategori_id`, `lokasyon`, `resim`, `kamera`) VALUES
+(1, 'Ghj', 'Ghj', 'Ghjk', 'Var', 'Yok', 'Hjkk', 'Ghjk', 1, NULL, '', NULL),
+(2, 'Hjkkj', 'Hhddd', 'Bhhh', 'Var', 'Var', 'Fguom', '99968', 1, NULL, '', NULL),
+(3, 'Ggh', 'Vvhh', 'Ghjh', 'Var', 'Yok', 'Vbh', '999', 1, NULL, '', NULL),
+(4, 'Hjkkjvhbbvjk', 'Yhjkjj', 'Ghbnn', 'Var', 'Yok', 'Bnlllkj', '86789', 1, NULL, '', NULL),
+(7, 'Hh', 'Hhh', 'Bb', 'Yok', 'Yok', 'Bbb', 'Bbb', 1, NULL, '1775463967_17754639376613051843326023897659.jpg', NULL);
 
 -- --------------------------------------------------------
 
@@ -102,7 +103,7 @@ CREATE TABLE `kullanicilar` (
 --
 
 INSERT INTO `kullanicilar` (`id`, `ad`, `kullanici_adi`, `sifre`, `rol`) VALUES
-(1, 'Admin User', 'admin', 'Ceza1Ceza', 1);
+(1, 'Admin User', 'admin', 'salman6969', 1);
 
 -- --------------------------------------------------------
 

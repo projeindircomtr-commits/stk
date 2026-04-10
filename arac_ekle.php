@@ -18,6 +18,7 @@ if(isset($_POST['kaydet'])){
     $camera      = $baglanti->real_escape_string($_POST['camera'] ?? 'Yok');
     $gps         = $baglanti->real_escape_string($_POST['gps'] ?? 'Yok');
     $kategori_id = intval($_POST['kategori_id'] ?? 0);
+    $lokasyon    = $baglanti->real_escape_string(trim($_POST['lokasyon'] ?? ''));
 
     $resim = '';
 
@@ -43,8 +44,8 @@ if(isset($_POST['kaydet'])){
     }
 
     if($mesaj == ''){
-        $sql = "INSERT INTO araclar (marka, model, plaka, sahip, telefon, camera, gps, kategori_id, resim)
-                VALUES ('$marka','$model','$plaka','$sahip','$telefon','$camera','$gps','$kategori_id','$resim')";
+        $sql = "INSERT INTO araclar (marka, model, plaka, sahip, telefon, camera, gps, kategori_id, lokasyon, resim)
+                VALUES ('$marka','$model','$plaka','$sahip','$telefon','$camera','$gps','$kategori_id','$lokasyon','$resim')";
         if($baglanti->query($sql)){
             $mesaj     = "Araç başarıyla kaydedildi!";
             $mesaj_tip = "success";
@@ -56,6 +57,7 @@ if(isset($_POST['kaydet'])){
 }
 
 $kategoriler = $baglanti->query("SELECT * FROM kategoriler ORDER BY ad ASC");
+$lokasyonlar = $baglanti->query("SELECT * FROM lokasyonlar ORDER BY ad ASC");
 ?>
 
 <!DOCTYPE html>
@@ -516,6 +518,19 @@ $kategoriler = $baglanti->query("SELECT * FROM kategoriler ORDER BY ad ASC");
                     </select>
                 </div>
             </div>
+            <div class="mb-1">
+                <label class="form-label">Lokasyon</label>
+                <div class="input-icon-wrapper">
+                    <i class="bi bi-geo-alt field-icon"></i>
+                    <select name="lokasyon" class="form-select">
+                        <option value="">Lokasyon Seçin...</option>
+                        <?php if($lokasyonlar && $lokasyonlar->num_rows > 0):
+                            while($l = $lokasyonlar->fetch_assoc()): ?>
+                            <option value="<?= htmlspecialchars($l['ad']) ?>"><?= htmlspecialchars($l['ad']) ?></option>
+                        <?php endwhile; endif; ?>
+                    </select>
+                </div>
+            </div>
         </div>
 
         <!-- SAHİP BİLGİLERİ -->
@@ -610,7 +625,7 @@ $kategoriler = $baglanti->query("SELECT * FROM kategoriler ORDER BY ad ASC");
                 <input type="file" name="resim" id="galeriInput" accept="image/*">
                 <i class="bi bi-cloud-arrow-up upload-icon"></i>
                 <div style="font-weight:700; color:#2c3e50; margin-bottom:5px;">Resim seçmek için tıklayın</div>
-                <div style="color:#999; font-size:0.82rem;">JPG, PNG, WEBP • Maks. 5MB</div>
+                <div style="color:#999; font-size:0.82rem;">JPG, PNG, WEBP • Maks. 100MB</div>
             </div>
 
             <!-- Önizleme -->

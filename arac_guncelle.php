@@ -24,13 +24,15 @@ if(isset($_POST['guncelle'])){
     $plaka = $baglanti->real_escape_string($_POST['plaka']);
     $sahip = $baglanti->real_escape_string($_POST['sahip']);
     $telefon = $baglanti->real_escape_string($_POST['telefon']);
+    $lokasyon = $baglanti->real_escape_string(trim($_POST['lokasyon'] ?? ''));
 
     $sql = "UPDATE araclar SET 
                 marka='$marka',
                 model='$model',
                 plaka='$plaka',
                 sahip='$sahip',
-                telefon='$telefon'
+                telefon='$telefon',
+                lokasyon='$lokasyon'
             WHERE id=$id";
 
     if($baglanti->query($sql)){
@@ -88,6 +90,10 @@ body { background: linear-gradient(135deg,#1a1a1a,#0d6efd); color:#fff; font-fam
   <div class="mb-3">
     <label>Telefon</label>
     <input type="tel" name="telefon" value="<?= htmlspecialchars($arac['telefon']) ?>" class="form-control" required>
+  </div>
+  <div class="mb-3">
+    <label>Lokasyon</label>
+    <input type="text" name="lokasyon" value="<?= htmlspecialchars($arac['lokasyon'] ?? '') ?>" class="form-control" placeholder="Lokasyon">
   </div>
   <button type="submit" name="guncelle" class="btn btn-success">Güncelle</button>
 </form>
